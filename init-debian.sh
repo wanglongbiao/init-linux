@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# 使用方法：
+# su -c "bash <(wget -qO- https://raw.githubusercontent.com/wanglongbiao/init-linux/main/init-debian.sh) longbiao"
+
+
+
+
 # 获取目标用户：优先用传参，否则用环境变量 USER
 TARGET_USER=${1:-$USER}
 
@@ -10,12 +16,16 @@ fi
 
 echo "正在为用户 $TARGET_USER 初始化..."
 
-# 1、检查并将 /sbin 加入到 $PATH
+# 1、检查并将 /sbin 加入到 $PATH（避免重复追加）
 if [[ ":$PATH:" != *":/sbin:"* ]]; then
-    echo "export PATH=\$PATH:/sbin" >> /etc/profile
-    echo "已添加 /sbin 到 PATH 环境变量"
+    if ! grep -q ':/sbin' /etc/profile; then
+        echo 'export PATH=$PATH:/sbin' >> /etc/profile
+        echo "已添加 /sbin 到 PATH 环境变量"
+    else
+        echo "/etc/profile 已包含 /sbin 配置"
+    fi
 else
-    echo "/sbin 已在 PATH 环境变量中"
+    echo "/sbin 已在当前 PATH 环境变量中"
 fi
 
 # 2、将用户加入 sudo 用户组
